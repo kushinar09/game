@@ -3,19 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package snakegame;
+package pingponggame;
 
 /**
  *
  * @author FR
  */
-public class SnakeGame {
+public class PingPongGame {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        GameFrame frame = new GameFrame();
+        // TODO code application logic here
+        GameFrame game = new GameFrame();
     }
-
+    
 }

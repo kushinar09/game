@@ -37,7 +37,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private JLabel statusLabel;
     private JPanel controlPanel;
     private String msg = "";
-    String fpath = "C:\\Users\\FR\\Documents\\Code Java\\SnakeGame\\src\\snakegame\\record.txt";
+    String fpath = "C:\\Users\\FR\\Documents\\GitHub\\game\\SnakeGame\\src\\snakegame\\record.txt";
 
     public GamePanel() {
         random = new Random();
@@ -67,10 +67,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void draw(Graphics g) {
         if (running) {
-            for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
-                g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
-                g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
-            }
+//            for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
+//                g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
+//                g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
+//            }
             g.setColor(Color.red);
             g.fillOval(meatX, meatY, MEAT_SIZE, MEAT_SIZE);
 
@@ -127,7 +127,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void checkMeat() {
-        if (x[0] >= meatX && y[0] >= meatY && x[0] <= meatX + MEAT_SIZE && y[0] <= meatY + MEAT_SIZE) {
+        if (x[0] >= meatX && y[0] >= meatY && x[0] < meatX + MEAT_SIZE && y[0] < meatY + MEAT_SIZE) {
             bodyParts++;
             meatsEaten++;
             newMeat();
