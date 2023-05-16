@@ -8,6 +8,8 @@ package snakegame;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.swing.*;
 import java.util.Random;
 import java.util.Scanner;
@@ -37,7 +39,9 @@ public class GamePanel extends JPanel implements ActionListener {
     private JLabel statusLabel;
     private JPanel controlPanel;
     private String msg = "";
-    String fpath = "C:\\Users\\FR\\Documents\\GitHub\\game\\SnakeGame\\src\\snakegame\\record.txt";
+    //String fpath = "C:\\Users\\FR\\Documents\\GitHub\\game\\SnakeGame\\src\\snakegame\\record.txt";
+    Path rootDir = Paths.get(".").normalize().toAbsolutePath();
+    String fpath = rootDir.toString() + "/src/" + "record.txt";
 
     public GamePanel() {
         random = new Random();
