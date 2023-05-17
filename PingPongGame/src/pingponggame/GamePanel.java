@@ -5,135 +5,174 @@
  */
 package pingponggame;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Random;
-import java.util.TimerTask;
 import javax.swing.*;
 
 /**
  *
  * @author FR
  */
-public class GamePanel extends JPanel implements ActionListener {
+public class GamePanel extends JPanel implements Runnable {
 
     static final int SCREEN_WIDTH = 1280;
-    static final int SCREEN_HEIGHT = 640;
-    static final int UNIT_SIZE = 20;
-    static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
-
-    public static int speed = 0;
-    public static Timer timer;
-
-    public boolean right, down, running = false;
-//    public SpelTimerTask spelTask;
-    public Rectangle ball, block1, block2, space;
-    public JButton start;
-
+    static final int SCREEN_HEIGHT = (int) (SCREEN_WIDTH * (0.555));
+    static final Dimension SCREEN_SIZE = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
+    static final int BALL_SIZE = 20;
+    static final int PLAYER_WIDTH = 25;
+    static final int PLAYER_HEIGHT = 100;
+    final int maxspeed = 14;
+    final int speedOfPlayer = 10;
+    Thread gameThread;
+    Image image;
+    Graphics g;
     Random random;
+    Player player1, player2;
+    Ball ball;
+    Score score;
 
     public GamePanel() {
+        newPlayer();
+        newBall();
+        score = new Score(SCREEN_WIDTH, SCREEN_HEIGHT);
+        setFocusable(true);
+        addKeyListener(new eventOfGame());
+        setPreferredSize(SCREEN_SIZE);
+
+        gameThread = new Thread(this);
+        gameThread.start();
+    }
+
+    public void newPlayer() {
+        player1 = new Player(0, (int) ((SCREEN_HEIGHT - PLAYER_HEIGHT) / 2), PLAYER_WIDTH, PLAYER_HEIGHT, 1);
+        player1.speed = speedOfPlayer;
+        player2 = new Player(SCREEN_WIDTH - PLAYER_WIDTH, (int) ((SCREEN_HEIGHT - PLAYER_HEIGHT) / 2), PLAYER_WIDTH, PLAYER_HEIGHT, 2);
+        player2.speed = speedOfPlayer;
+    }
+
+    public void newBall() {
         random = new Random();
-        space = new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        ball = new Rectangle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, UNIT_SIZE, UNIT_SIZE);
-        block1 = new Rectangle(0, 0, UNIT_SIZE, 4 * UNIT_SIZE);
-        block2 = new Rectangle(SCREEN_WIDTH - UNIT_SIZE, 0, UNIT_SIZE, 4 * UNIT_SIZE);
-        this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
-        this.setBackground(Color.black);
-        //this.addKeyListener(new MyKeyAdapter());
-        this.setFocusable(true);
-        start = new JButton("Start");
-        start.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ball = new Rectangle(0, 0, 20, 20);
-                start.setFocusable(false);
-                start.hide();
-                startGame();
-            }
-        });
-        add(start);
-    }
-
-//    class SpelTimerTask extends TimerTask {
-//
-//        public void run() {
-//            repaint();
-//            if (running) {
-//                move();
-//                repaint();
-//            }
-//        }
-//    }
-
-    public void startGame() {
-        running = true;
-        timer = new Timer(70, this);
-        timer.start();
-    }
-
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        draw(g);
-    }
-
-    public void draw(Graphics g) {
-//        if (running) {
-            //g.clearRect(space.x, space.y, space.width, space.height);
-            for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
-                g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
-            }
-            for (int i = 0; i < SCREEN_WIDTH / UNIT_SIZE; i++) {
-                g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
-            }
-            g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
-            g.fillOval(ball.x, ball.y, ball.width, ball.height);
-            g.setColor(Color.red);
-            g.fillRect(block1.x, block1.y, block1.width, block1.height);
-            g.setColor(Color.blue);
-            g.fillRect(block2.x, block2.y, block2.width, block2.height);
-        //}
+        int Yball = random.nextInt(SCREEN_HEIGHT - BALL_SIZE);
+        ball = new Ball(SCREEN_WIDTH / 2, Yball, BALL_SIZE, BALL_SIZE);
     }
 
     public void move() {
-        if (right) {
-            ball.x += UNIT_SIZE * (1 + 1 * speed);
-        } else {
-            ball.x -= UNIT_SIZE * (1 + 1 * speed);
+        player1.move();
+        player2.move();
+        ball.move();
+    }
+
+    public void paint(Graphics gn) {
+        image = createImage(getWidth(), getHeight());
+        g = image.getGraphics();
+        draw(g);
+        gn.drawImage(image, 0, 0, this);
+    }
+
+    public void draw(Graphics g) {
+        g.setColor(Color.gray);
+        g.drawLine(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+        player1.draw(g);
+        player2.draw(g);
+        ball.draw(g);
+        score.draw(g);
+        Toolkit.getDefaultToolkit().sync();
+    }
+
+    public void checkCollision() {
+        //player not out of screen
+        if (player1.y < 0) {
+            player1.y = 0;
         }
-        if (down) {
-            ball.y += UNIT_SIZE * (1 + 1 * speed);
-        } else {
-            ball.y -= UNIT_SIZE * (1 + 1 * speed);
+        if (player2.y < 0) {
+            player2.y = 0;
+        }
+        if (player1.y > SCREEN_HEIGHT - player1.height) {
+            player1.y = SCREEN_HEIGHT - player1.height;
+        }
+        if (player2.y > SCREEN_HEIGHT - player2.height) {
+            player2.y = SCREEN_HEIGHT - player2.height;
         }
 
-        if (ball.y >= block1.y && ball.y <= (block1.y + block1.height) && ball.x == block1.width) {
-            right = true;
+        //bounce top and bottom
+        if (ball.y <= 0 || ball.y >= SCREEN_HEIGHT - ball.height) {
+            ball.setYDirection(-ball.bYchange);
         }
-        if (ball.y >= block2.y && ball.y <= (block2.y + block1.height) && ball.x == (SCREEN_WIDTH - block2.width + ball.width)) {
-            right = false;
+
+        //bounce player
+        if (ball.intersects(player1)) {
+            ball.bXchange = Math.abs(ball.bXchange);
+            if(ball.bXchange < maxspeed) ball.bXchange++; 
+            if (ball.bYchange > 0 && ball.bYchange < maxspeed) {
+                ball.bYchange++; 
+            } else if(ball.bYchange > -maxspeed){
+                ball.bYchange--;
+            }
+            ball.setXDirection(ball.bXchange);
+            ball.setYDirection(ball.bYchange);
         }
-        if (ball.y <= 10) {
-            down = true;
+        if (ball.intersects(player2)) {
+            ball.bXchange = Math.abs(ball.bXchange);
+            if(ball.bXchange < maxspeed) ball.bXchange++; 
+            if (ball.bYchange > 0 && ball.bYchange < maxspeed) {
+                ball.bYchange++; 
+            } else if(ball.bYchange > -maxspeed){
+                ball.bYchange--;
+            }
+            ball.setXDirection(-ball.bXchange);
+            ball.setYDirection(ball.bYchange);
         }
-        if (ball.y >= SCREEN_HEIGHT - ball.height - 10) {
-            down = false;
+        
+        //ball touch bound
+        if(ball.x <= 0){
+            score.player2++;
+            newBall();
+            newPlayer();
+        }
+        
+        if(ball.x >= SCREEN_WIDTH - ball.width){
+            score.player1++;
+            newBall();
+            newPlayer();
         }
     }
 
-    public void checkGameOver() {
-        if (ball.x <= 10 || ball.x >= SCREEN_WIDTH - 10) {
-            running = false;
+    public void run() {
+        //game loop
+        long lastTime = System.nanoTime();
+        double amountOfTicks = 60.0;
+        double ns = 1000000000 / amountOfTicks;
+        double delta = 0;
+        while (true) {
+            long now = System.nanoTime();
+            delta += (now - lastTime) / ns;
+            lastTime = now;
+            if (delta >= 1) {
+                move();
+                checkCollision();
+                repaint();
+                delta--;
+            }
         }
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (running) {
-            move();
-            checkGameOver();
+    public class eventOfGame extends KeyAdapter {
+
+        public void keyPressed(KeyEvent e) {
+            player1.keyPressed(e);
+            player2.keyPressed(e);
         }
-        repaint();
+
+        public void keyReleased(KeyEvent e) {
+            player1.keyReleased(e);
+            player2.keyReleased(e);
+        }
     }
 }
