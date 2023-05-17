@@ -15,9 +15,9 @@ public class GameFrame extends JFrame {
 
     public GameFrame() {
         this.add(new GamePanel());
-        this.setTitle("First GofMe");
+        this.setTitle("PingPong");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setResizable(true);
+        this.setResizable(false);
         this.pack();
         this.setVisible(true);
         this.setLocationRelativeTo(null);

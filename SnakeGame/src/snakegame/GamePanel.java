@@ -36,8 +36,7 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean running = false;
     Timer timer;
     Random random;
-    private JLabel statusLabel;
-    private JPanel controlPanel;
+    public JButton start;
     private String msg = "";
     //String fpath = "C:\\Users\\FR\\Documents\\GitHub\\game\\SnakeGame\\src\\snakegame\\record.txt";
     Path rootDir = Paths.get(".").normalize().toAbsolutePath();
@@ -45,15 +44,22 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public GamePanel() {
         random = new Random();
+        start = new JButton("Start");
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.black);
         this.addKeyListener(new MyKeyAdapter());
         this.setFocusable(true);
-        startGame();
-    }
-
-    public void restart() {
-        startGame();
+        add(start);
+        start.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {              
+                start.setFocusable(false);
+                start.hide();
+                startGame();
+            }
+        });
+        
+        //startGame();
     }
 
     public void startGame() {
