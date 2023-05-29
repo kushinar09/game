@@ -15,7 +15,7 @@ import javax.swing.JFrame;
 public class GameFrame extends JFrame {
 
     public GameFrame() {
-        this.add(new GamePanel());
+        this.add(new GameFrame());
         this.setTitle("PingPong");
         this.setBackground(Color.black);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
